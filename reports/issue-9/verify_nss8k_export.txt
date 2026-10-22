@@ -1,0 +1,59 @@
+ファイル: data/export/j2_nss8k.h5
+[train] N = 13,224,000
+  [OK] 形状 X(13224000, 4) X_raw(13224000, 3) Y(13224000, 1) Y_scaled(13224000, 1) a_phys(13224000, 1)
+  [OK] 有限（NaN/Inf なし）
+  [OK] X[:,0:2] = sin q, cos q
+  [OK] X[:,2] = dq / DTHETA_MAX
+  [OK] X[:,3] = tau / TAU_MAX
+  [OK] Y_scaled = Y / DDQ_SCALE
+  [OK] a_phys = 解析モデル（X_raw, /physics から再計算）
+  [OK] リミットから 0.1° を超えて内側（最小 0.88°）
+  [OK] scenario_id は 0 始まりで範囲内
+  [OK] 全行が split == 'train' のシナリオに属する
+  [OK] step は 0 ≤ step < n_transition
+     near_limit 942 件、ddq の標準偏差 14.167、(Y − a_phys) の RMS 0.519 rad/s²
+  [OK] /stats/x_mean = train の X_raw の平均
+  [OK] /stats/x_std = train の X_raw の標準偏差
+  [OK] /stats/ddq_std = train の ddq の標準偏差
+  [OK] /stats/res_std = train の残差の標準偏差
+[val] N = 2,648,000
+  [OK] 形状 X(2648000, 4) X_raw(2648000, 3) Y(2648000, 1) Y_scaled(2648000, 1) a_phys(2648000, 1)
+  [OK] 有限（NaN/Inf なし）
+  [OK] X[:,0:2] = sin q, cos q
+  [OK] X[:,2] = dq / DTHETA_MAX
+  [OK] X[:,3] = tau / TAU_MAX
+  [OK] Y_scaled = Y / DDQ_SCALE
+  [OK] a_phys = 解析モデル（X_raw, /physics から再計算）
+  [OK] リミットから 0.1° を超えて内側（最小 2.22°）
+  [OK] scenario_id は 0 始まりで範囲内
+  [OK] 全行が split == 'val' のシナリオに属する
+  [OK] step は 0 ≤ step < n_transition
+     near_limit 0 件、ddq の標準偏差 14.406、(Y − a_phys) の RMS 0.539 rad/s²
+[test] N = 2,992,000
+  [OK] 形状 X(2992000, 4) X_raw(2992000, 3) Y(2992000, 1) Y_scaled(2992000, 1) a_phys(2992000, 1)
+  [OK] 有限（NaN/Inf なし）
+  [OK] X[:,0:2] = sin q, cos q
+  [OK] X[:,2] = dq / DTHETA_MAX
+  [OK] X[:,3] = tau / TAU_MAX
+  [OK] Y_scaled = Y / DDQ_SCALE
+  [OK] a_phys = 解析モデル（X_raw, /physics から再計算）
+  [OK] リミットから 0.1° を超えて内側（最小 1.39°）
+  [OK] scenario_id は 0 始まりで範囲内
+  [OK] 全行が split == 'test' のシナリオに属する
+  [OK] step は 0 ≤ step < n_transition
+     near_limit 0 件、ddq の標準偏差 14.887、(Y − a_phys) の RMS 0.531 rad/s²
+[benchmark] N = 533,480
+  [OK] 形状 X(533480, 4) X_raw(533480, 3) Y(533480, 1) Y_scaled(533480, 1) a_phys(533480, 1)
+  [OK] 有限（NaN/Inf なし）
+  [OK] X[:,0:2] = sin q, cos q
+  [OK] X[:,2] = dq / DTHETA_MAX
+  [OK] X[:,3] = tau / TAU_MAX
+  [OK] Y_scaled = Y / DDQ_SCALE
+  [OK] a_phys = 解析モデル（X_raw, /physics から再計算）
+  [OK] リミットから 0.1° を超えて内側（最小 35.03°）
+  [OK] scenario_id は 0 始まりで範囲内
+  [OK] 全行が split == 'benchmark' のシナリオに属する
+  [OK] step は 0 ≤ step < n_transition
+     near_limit 0 件、ddq の標準偏差 9.081、(Y − a_phys) の RMS 0.147 rad/s²
+  [OK] 遷移数の合計 19,397,480 = シナリオ別 n_transition の合計 19,397,480
+結果: 合格
