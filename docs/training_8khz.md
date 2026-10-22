@@ -85,3 +85,15 @@
 2. **ゲイン違いの再現性 (c2)**: (c) は wn = 30 rad/s・ζ = 1 の PD 1 種類での追従のみ。ゲインを振ったときの閉ループ応答とコストの順位が真値と合うかは、次のステップで評価する。案は、wn ∈ {15, 30, 60} rad/s × ζ ∈ {0.7, 1, 1.5} の 9 組で PTP の真値を生成して比べる（真値生成は 1 組あたり約 10 分、計約 1.5 時間）。
 
 したがって、今回の NSS が保証するのは「wn = 30 rad/s・ζ = 1 の PD を使った剛体 J2 の閉ループ追従」までで、ゲイン最適化や制振評価にそのまま使える保証はない。
+
+## 8. 実装（issue #13）
+
+```bash
+.venv/bin/python python/train_nss.py --model A --width 128 --run A_w128_s0        # 20 エポック、バッチ 4096、patience 5
+.venv/bin/python python/train_nss.py --model B --width 128 --epochs 5 --run B_w128_screen
+.venv/bin/python python/evaluate_nss.py --run A_w128_s0 --report-dir reports/issue-N/A_w128_s0   # ゲート (a)〜(d) を判定
+.venv/bin/python -m unittest discover -s python/tests                              # 単体テスト（39 件、約 20 秒）
+```
+- `python/nss8k/`（`data.py` `physics.py` `model.py` `evaluate_lib.py`）、`python/train_nss.py`、`python/evaluate_nss.py`。フォーク元の `python/j2nsm`（1 kHz）は残してあるが 8 kHz では使わない。
+- 閉ループの参照は HDF5 の `qref`（倍精度）を数値微分して作る（速度・加速度）。Python の PD＋FF を真値の状態に当てると、記録トルクとの差は RMS 0.016 N·m（制御器の再現を確認）。
+- 評価の所要時間: 全体で約 3 分（窓 100 本の動作確認時。窓を全件にすると増える）。学習は幅 64 で 30 万行 3 エポックが約 10 秒。
