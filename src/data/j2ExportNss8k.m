@@ -17,7 +17,8 @@ function info = j2ExportNss8k(ds, outFile, opts)
 %     /<split>/scenario_id (N,)   int32、/scenarios/* の添字
 %     /<split>/step        (N,)   int32、シナリオ内の遷移番号
 %     /<split>/near_limit  (N,)   uint8、リミットから 1° 以内なら 1
-%     /<split>/qref        (N,)   参照角 [rad]（姿勢保持・PTP のみ。励振は NaN）。遷移 k の開始時刻の値
+%     /<split>/qref        (N,)   参照角 [rad]、常に倍精度（姿勢保持・PTP のみ。励振は NaN）。遷移 k の開始時刻の値。
+%                                 閉ループの参照の微分（速度・加速度）にノイズを出さないため dtype によらず double
 %     /scenarios/{name,pattern,type,phase,split}、/scenarios/{seed,n_transition}
 %     /stats/{x_mean,x_std}（X_raw の列）、/stats/{ddq_mean,ddq_std,res_mean,res_std}
 %     /scale/*、/physics/*（M mgL Fc Bv eps qMin qMax qdMax tauRated tauPeak）、ルート属性
@@ -61,7 +62,7 @@ for i = 1:numel(opts.splits)
     writeVec(outFile, ['/' sp '/scenario_id'], vertcat(Sid{:}), opts, '0-based index into /scenarios');
     writeVec(outFile, ['/' sp '/step'],        vertcat(Stp{:}), opts, '0-based transition index within the scenario');
     writeVec(outFile, ['/' sp '/near_limit'],  vertcat(Nl{:}),  opts, '1 = within 1 deg of a joint limit');
-    writeVec(outFile, ['/' sp '/qref'],        cast(vertcat(Qr{:})), opts, 'reference angle [rad] at step start (hold/ptp), NaN otherwise');
+    writeVec(outFile, ['/' sp '/qref'],        double(vertcat(Qr{:})), opts, 'reference angle [rad] at step start (hold/ptp), NaN otherwise');
     info.n.(sp) = size(X,1);
 end
 writeStr(outFile, '/scenarios/name',    string({S.name}));
