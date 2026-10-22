@@ -1,7 +1,7 @@
 function ds = genJ2Dataset(opts)
 %GENJ2DATASET シナリオを実行して J2 単軸の学習データセットを生成する。
 %   ds = GENJ2DATASET(opts)
-%     opts.preset    'full'（既定）| 'small'
+%     opts.preset    'full'（既定）| 'small' | 'nss8k' | 'nss8k_small'（接触なし 8 kHz。キャッシュは double）
 %     opts.outDir    保存先（既定 <repo>/data）。cache/ と データセット .mat を置く
 %     opts.shard     [i n]: n 分割したうちの i 番目だけ新規生成する（複数の MATLAB プロセスで分担）
 %     opts.maxScen   1 回の呼び出しで新規生成するシナリオ数の上限（既定 Inf）
@@ -50,8 +50,9 @@ if ~isempty(mine)
         if nNew >= opts.maxScen, break; end
         s = S(k);  t0 = tic;
         raw = runJ2Scenario(s, models);
-        e = struct('name',s.name,'q',single(raw.q),'dq',single(raw.dq),'tau',single(raw.tau), ...
-            'qref',single(raw.qref),'q0',raw.q0,'dq0',raw.dq0,'contact8k',raw.contact,'fs',jp.fsSim, ...
+        cast = @single;  if startsWith(opts.preset,'nss8k'), cast = @double; end   % nss8k は倍精度（q の丸めが 2 次の項に効くため）
+        e = struct('name',s.name,'q',cast(raw.q),'dq',cast(raw.dq),'tau',cast(raw.tau), ...
+            'qref',cast(raw.qref),'q0',raw.q0,'dq0',raw.dq0,'contact8k',raw.contact,'fs',jp.fsSim, ...
             'wall',toc(t0)); %#ok<NASGU>
         tmp = [cacheFn(s) '.tmp'];  save(tmp, 'e');  movefile(tmp, cacheFn(s));   % 書き込み途中のファイルを残さない
         nNew = nNew + 1;
@@ -67,7 +68,11 @@ if any(arrayfun(@(s) ~isfile(cacheFn(s)), S))
     fprintf('未生成のシナリオが残っています。同じ引数で再実行すると続きから生成します。\n');
     return;
 end
-ds = assembleJ2Dataset(S, cacheFn, opts, jp);
+if startsWith(opts.preset,'nss8k')
+    ds = assembleJ2Dataset8k(S, cacheFn, opts, jp);     % 8 kHz のまま（間引きなし）
+else
+    ds = assembleJ2Dataset(S, cacheFn, opts, jp);
+end
 end
 
 function ds = assembleJ2Dataset(S, cacheFn, opts, jp)

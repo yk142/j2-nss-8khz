@@ -1,0 +1,317 @@
+{
+  "validation": [
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "すべて有限",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "|tau| <= tauPeak",
+        "pass": true,
+        "value": 860.4
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "|dq| < qdMax",
+        "pass": true,
+        "value": 4.3788638851135122
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "全サンプルがリミットから 0.1° を超えて内側（接触なし）",
+        "pass": true,
+        "value": 0.88223078639262553
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "atLimit の遷移が 0 件",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "contact_* と nearlimit を含まない",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "配列長の整合 (q,dq = K+1, tau,atLimit,nearLimit = K)",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "シナリオ名が一意",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "benchmark は split=benchmark のみ",
+        "pass": true,
+        "value": 12
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "train/val/test がそろっている（100 本以上のとき）",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "シナリオ表が j2ScenarioSet(preset) と一致（名前・split・シード）",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "正規化統計 = train の統計",
+        "pass": true,
+        "value": 0
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "解析モデルの 1 ステップ加速度残差 / 加速度 RMS < 0.5",
+        "pass": true,
+        "value": 0.036401793715666993
+      }
+    },
+    {
+      "nErrors": 0,
+      "metrics": {
+        "nearLimitTransitions": 942,
+        "minDistToLimitDeg": 0.88223078639262553,
+        "modelResidualRatio": 0.036401793715666993,
+        "modelResidualRMS": 0.51686388679286088,
+        "forkCompared": 328,
+        "forkMissing": 0,
+        "nTransition": 1.939748E+7
+      },
+      "checks": {
+        "name": "フォーク元のキャッシュと一致（single に丸めて、比較した全シナリオ）",
+        "pass": true,
+        "value": [
+          328,
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "stats": {
+    "xMean": [
+      -1.2106005412589171,
+      -0.0513479483161581,
+      19.635944232373255
+    ],
+    "xStd": [
+      1.3939975555539139,
+      0.81696375402999477,
+      98.524573760922109
+    ],
+    "ddqMean": 0.0016161979265039577,
+    "ddqStd": 14.166758769662369,
+    "resMean": 3.9474301204389516E-5,
+    "resStd": 0.51855088324901133,
+    "note": "正規化統計は train の全遷移から算出。X=[q dq tau]（tau は区間先頭の瞬時値）、ddq=Δdq/Δt、res=ddq−解析モデル（x_k, tau_k で評価）"
+  },
+  "scale": {
+    "DTHETA_MAX": 5.2359877559829888,
+    "TAU_MAX": 860.40000000000009,
+    "DDQ_SCALE": 141.38141522486217
+  },
+  "manifest": {
+    "created": "2026/10/23 03:54:09",
+    "preset": "nss8k",
+    "fsRaw": 8000,
+    "fsData": 8000,
+    "nScenario": 328,
+    "nTrain": 222,
+    "nVal": 45,
+    "nTest": 49,
+    "nBenchmark": 12,
+    "nTransition": 1.939748E+7,
+    "qFixedDeg": [
+      0,
+      0,
+      75.0684,
+      0,
+      0,
+      0
+    ],
+    "torqueInput": "区間先頭の瞬時値 tau(t_k)",
+    "downsample": "なし（8 kHz のまま。遷移は隣接サンプルの組）",
+    "params": {
+      "M": 6.0856654931029244,
+      "mgL": 73.24512452011048,
+      "Fc": 23.82,
+      "Bv": 1.42,
+      "eps": 0.013004454926624737,
+      "qMin": -2.7576202181510405,
+      "qMax": 1.1344640137963142,
+      "qdMax": 5.2359877559829888,
+      "tauRated": 286.8,
+      "tauPeak": 860.40000000000009,
+      "tauRef": 286.8,
+      "qTrainMin": -2.1738075833589372,
+      "qTrainMax": 0.55065137900421091,
+      "qFixed": [
+        0,
+        0,
+        1.3101907442041112,
+        0,
+        0,
+        0
+      ],
+      "fsSim": 8000,
+      "fsData": 1000
+    },
+    "parentCommit": "5a7c690ed4088881ede4b2452c2b78028d236285",
+    "matlab": "25.1.0.2973910 (R2025a) Update 1"
+  }
+}
