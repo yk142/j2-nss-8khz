@@ -137,3 +137,25 @@ NaN なし、|τ| ≤ 860.4 N·m、|dq| ≤ 4.54 rad/s、q は −158.7° 〜 +6
 5. 姿勢保持・PTP の PD は連続形（wn = 30 rad/s）で、ソルバ刻み 8 kHz で評価される（離散制御器ではない）
 6. 初期角速度が非ゼロの実行で、Simscape の初期条件の警告が 1 行出る（結果には影響しない。`simJ2` / `runJ2Sim` で詳細警告のみ抑制）
 7. `benchmark` は評価専用。学習に混ぜると PTP の被覆評価（学習系の占有セルとの比較）の意味がなくなる
+
+## 8 kHz 接触なしデータセット（preset `nss8k`、NSS 用）
+要件は `docs/requirements_8khz.md`。328 本、19,397,480 遷移（train/val/test/benchmark = 13,224,000 / 2,648,000 / 2,992,000 / 533,480）。トルクは区間先頭の瞬時値、Δt = 125 µs。
+
+```matlab
+d = load('data/j2_dataset_nss8k.mat');                 % genJ2Dataset(struct('preset','nss8k')) → tools/j2_finish8k.m の出力
+j2ExportNss8k(d, 'data/export/j2_nss8k.h5');           % 約 685 MB（single、gzip）、約 1 分
+```
+```bash
+.venv/bin/python tools/verify_nss8k_export.py data/export/j2_nss8k.h5
+```
+| パス | 形状 | 内容 |
+|---|---|---|
+| `/<split>/X` | (N, 4) | `[sin q, cos q, dq/5.236, tau/860.4]`（モデル入力） |
+| `/<split>/X_raw` | (N, 3) | `[q, dq, tau]`（SI 単位） |
+| `/<split>/Y` | (N, 1) | `ddq` [rad/s²] = (dq_next − dq)/Δt（評価はこの単位） |
+| `/<split>/Y_scaled` | (N, 1) | `ddq / 141.38`（純 NN (A) の目標） |
+| `/<split>/a_phys` | (N, 1) | 解析モデルの加速度。残差型 (B) の目標は `Y − a_phys` |
+| `/<split>/{scenario_id,step,near_limit,qref}` | (N,) | 0 始まりの添字、リミットから 1° 以内のフラグ（942 件、すべて `hold_+060` の train）、参照角 |
+| `/stats/*` | | `x_mean x_std`（X_raw の列）、`ddq_mean ddq_std res_mean res_std`（train） |
+
+`excludeNearLimit=true` で 1° 以内の遷移を除ける。接触（0.1° 以内）は 0 件。
