@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 参照先
 
+- **`docs/handover.md`（フォーク元 j2-state-data-gen からの引継ぎ。最初に読む）**
 - `README.md`（使い方）、`docs/dataset.md`（データセット仕様と注意点）、`docs/plan.md`（進捗）、`docs/phase*_report.md`（各フェーズの結果）
 - 再現確認: `matlab -batch "addpath('tools'); j2_repro_check()"`（キャッシュなしで再生成し、保存済み 8 kHz データとのビット一致を確認）
 
@@ -59,30 +60,8 @@ raw = runJ2Scenario(S(k), struct('excite',mE,'closed',mC));   % 1 シナリオ�
 - MATLAB MCP サーバー経由の実行は 120 s でバックグラウンド化される。長い実行は完了通知を待つ
 - 8 kHz のシミュレーションは実時間の約 5〜6 倍かかる（Parallel Computing Toolbox 未許諾のため直列）
 
+## このリポジトリの位置づけ
+`yk142/j2-state-data-gen`（J2 単軸の学習データ生成〜学習・評価まで完了。2026-10-10 時点の main = `834680a`）から**フォーク**した、**8 kHz の NSS（Neural State Space）**の検討用リポジトリ。フォーク元は remote `upstream`。上記「決定事項」「コマンド」は J2 版のもので、8 kHz 版で変える点は `docs/handover.md` を参照。
+
 ## 現状
-
-Phase 4 まで完了（生成・検証・カバレッジ評価・再現確認・ドキュメント）。Phase 2 まで（プラント `src/plant/`、評価 `src/analysis/`、制御・参照軌道 `src/control/`、励振・シナリオ `src/data/`、解析パラメータ `src/model/`、テスト `test/`）。要件・計画は `docs/`。リポジトリ直下には日本語の引継ぎ資料（`Neural State Model 学習データ生成スクリプト 引継ぎ資料…md`、ステータス: 未着手）のみがあり、コード・ビルド・lint・テストの設定はまだ存在しない。git リポジトリではない。実装前に必ず資料を読むこと（各モジュールのコード例と収集計画が載っている）。以下は特に間違えやすい点をまとめたもの。
-
-## 目的
-
-6軸ロボットの **2軸目** の **Neural State Model**（次時刻状態推論モデル）用の学習データを、Python から MATLAB シミュレーター（`matlab.engine`。この環境では MATLAB MCP サーバーも利用可能）を呼び出して生成する。
-
-- モデル入力: `(sin θ, cos θ, θ̇/DTHETA_MAX, τ/TAU_MAX)`、出力: 正規化した差分残差 `(θ_{t+1}-θ)/D_THETA_MAX, (θ̇_{t+1}-θ̇)/D_DTHETA_MAX`。
-- 予定構成: `data_collection/` 配下に `config.py`、`excitation.py`、`initial_states.py`、`simulator_interface.py`、`collectors/phase{1_broadband,2_structured,3_active}.py`、`coverage.py`、`dataset.py`、`run_collection.py`。
-
-## 物理系の規約（間違えやすい点）
-
-- 垂直平面。**θ=0 は倒立位置（不安定平衡点）**、安定平衡点は θ=±π（垂下）。重力トルクは `τ_g = −mgL·sin θ`。
-- 可動範囲は非対称: **−158° 〜 +65°**（−2.757 〜 1.134 rad）。安定点（−180°）は範囲外なので、自由落下させると必ずリミットに到達する。
-- シミュレーションは **8 kHz**（Δt=125 µs）、学習データは **1 kHz**（Δt=1 ms、1/8 間引き）。8kHz の生データを保存してから間引くこと。
-- MATLAB モデルがリミット処理を内包しているか、単位系（deg/rad、rpm/rad/s）、固定/可変ステップかは**未確認**。依存する前に確認し、内包していなければ Python 側でクリップ処理を追加する。リミット接触時のサンプルを除外するか含めるかも未決定。
-- J、m、L、b、TAU_MAX、DTHETA_MAX（仮値 3.0 rad/s、TAU_MAX 300 N·m）は MATLAB モデルから取得すること。`D_DTHETA_MAX = (TAU_MAX/J)·0.001`。
-- 資料中の `simulate_joint2(theta0, dtheta0, tau_seq, dt)` は仮のインターフェース。実際の関数名・引数を確認すること。
-
-## 収集計画（約360軌跡、1kHz換算で約340万サンプル）
-
-- フェーズ1（140軌跡）: 振幅・帯域を変えたバンドリミテッドノイズ＋自由落下。初期状態 (θ₀, θ̇₀) は Sobol 列で生成。
-- フェーズ2（160軌跡）: 重要7姿勢（0°, +30°, +60°, −45°, −90°, −120°, −150°）× 20軌跡、加えてチャープ／最大トルクステップ／微小トルク／リミット付近の各パターン。θ=0 近傍は自由落下だと通過するだけなので、安定化制御＋外乱で収集する。
-- フェーズ3（60軌跡）: 能動学習。フェーズ1+2でアンサンブルを学習し、予測分散の大きい領域を初期状態として3イテレーション追加収集。
-- 保存形式: HDF5。軌跡ごとに `traj_XXXX` グループを作り、`theta`・`dtheta`・`tau`（float32）と `pattern`/`phase` 属性を持たせる。`build_flat_dataset` でフラットな (X, Y) 配列を生成。カバレッジ評価は (θ, θ̇, τ) の3次元ヒストグラム占有率と位相平面プロット。
-- 初期状態はリミットから5°内側の安全マージンを取る。
+フォーク直後。8 kHz 版の要件は未確定（`docs/handover.md` の「未決事項」）。git 管理外のデータ（`data/cache/` の 8 kHz 生データなど）はフォーク元にある。
