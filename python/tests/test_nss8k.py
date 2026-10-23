@@ -153,6 +153,19 @@ class TestNss8k(unittest.TestCase):
         g = ev.judge("B", one, None, rows, thr)
         self.assertIn("c", g); self.assertTrue(g["c"]["pass"])
 
+    def test_judge_limits(self):
+        """(a) は test のみ判定（benchmark は参考値）、(b) は 4,000 ステップで判定（8,000 ステップは参考値）。"""
+        one = {"test": {"all": {"ratio_to_analytic": 0.9}}, "benchmark": {"all": {"ratio_to_analytic": 3.0}}}
+        mk = lambda r4, r8: {"horizon": 8000, "methods": {"model": {"rmse_q_deg": {"4000": r4, "8000": r8}},
+                                                          "analytic": {"rmse_q_deg": {"4000": 0.15, "8000": 0.25}}}}
+        rows = [{"model": {"diverged": False, "vs_truth_rmse_q_deg": 0.02}, "analytic": {"vs_truth_rmse_q_deg": 0.01}}]
+        thr = {"model": {"steps_per_s": 2e5}, "analytic": {"steps_per_s": 5e6}}
+        g = ev.judge("A", one, mk(0.3, 1.4), rows, thr)
+        self.assertTrue(g["a"]["pass"]); self.assertTrue(g["b"]["pass"])
+        self.assertFalse(ev.judge("A", one, mk(0.5, 0.5), rows, thr)["b"]["pass"])
+        one["test"]["all"]["ratio_to_analytic"] = 1.1
+        self.assertFalse(ev.judge("A", one, mk(0.3, 1.4), rows, thr)["a"]["pass"])
+
 
 if __name__ == "__main__":
     unittest.main()

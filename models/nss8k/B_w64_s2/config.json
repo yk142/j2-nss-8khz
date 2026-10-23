@@ -1,0 +1,24 @@
+{
+ "args": {
+  "data": "data/export/j2_nss8k.h5",
+  "run": "B_w64_s2",
+  "out_root": "data/train_nss8k",
+  "model": "B",
+  "width": 64,
+  "depth": 3,
+  "epochs": 20,
+  "batch": 4096,
+  "lr": 0.002,
+  "lr_min": 1e-05,
+  "patience": 5,
+  "max_train": 0,
+  "seed": 2,
+  "threads": 4
+ },
+ "n_param": 8769,
+ "best_val_loss": 0.35442493708544265,
+ "steps": 29061,
+ "train_time_s": 494.96840143203735,
+ "n_train": 13224000,
+ "n_val": 2648000
+}
