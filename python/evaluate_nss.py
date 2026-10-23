@@ -111,6 +111,9 @@ def main(argv=None):
         h = str(a.horizon)
         print(f"[窓の開ループ {win['n_windows']} 窓、{a.horizon} ステップ] θ RMSE: " +
               "  ".join(f"{m} {r['rmse_q_deg'][h]:.4f}°（発散 {r['diverged_fraction']:.1%}）" for m, r in win["methods"].items()))
+        if "4000" in win["methods"]["model"]["rmse_q_deg"]:
+            print("[窓の開ループ 4000 ステップ（参考）] θ RMSE: " +
+                  "  ".join(f"{m} {r['rmse_q_deg']['4000']:.4f}°" for m, r in win["methods"].items() if m != "persistence"))
     rows, seqs, res = ev.closed_loop_benchmark(model, phys, d)
     for r in rows:
         print(f"[閉ループ {r['name']}] 真値との θ RMSE: モデル {r['model']['vs_truth_rmse_q_deg']:.4f}°  "
