@@ -7,10 +7,12 @@ import torch
 from .data import group_of, sequences
 from .physics import Physics
 
-# ゲート（暫定を含む）。(a) は解析モデルの RMS に対する倍率（split ごと）、(b) は度
-# (a) の benchmark（PTP）は、解析モデルが既に良い（0.147 rad/s²）ため「解析モデルより悪くしない」（1.0 倍）にする。本学習の結果を見て確定
-GATES = {"a_ratio": {"test": {"A": 1.0, "B": 0.5}, "benchmark": {"A": 1.0, "B": 1.0}},
-         "b_deg": {"A": 1.0, "B": 0.3}, "c_deg": 0.1, "d_steps_per_s": 145000.0}
+# ゲート（docs/training_8khz.md §4、本学習 #16 の感度実験で確定）。主ゲートは (c)。
+# (a) test: 解析モデルの 1 ステップ RMS に対する倍率。1.0 倍以内なら (c) の最悪は 0.058° 以下だった（係数ずらし・補正の倍率実験）
+#     benchmark（PTP）は解析モデルが既に良い（0.147 rad/s²）ので参考値（判定しない）
+# (b) 4,000 ステップ（0.5 秒）の開ループ θ RMSE [°]。0.4° 以下なら (c) は 0.085° 以下だった。8,000 ステップは参考値
+#     （θ=0 まわりの不安定性で、(c) と無関係に増幅される）
+GATES = {"a_test_ratio": 1.0, "b_deg_4000": 0.4, "c_deg": 0.1, "d_steps_per_s": 145000.0}
 # PD の設計（MATLAB の buildJ2ClosedLoop の既定: wn = 30 rad/s、ζ = 1、Kp = M·wn²、Kd = 2·ζ·M·wn、±tauPeak で飽和）
 PD_WN, PD_ZETA = 30.0, 1.0
 
@@ -224,16 +226,13 @@ def judge(kind, one_step, windows, closed, thr, gates=GATES):
     """ゲート (a)(b)(c)(d) の合否。kind は 'A' か 'B'。one_step は {split: 表}、windows は window_rollouts の出力。"""
     g = {}
     ratios = {sp: t["all"]["ratio_to_analytic"] for sp, t in one_step.items() if sp in ("test", "benchmark")}
-    lim = {sp: gates["a_ratio"][sp][kind] for sp in ratios}
-    g["a"] = {"pass": all(ratios[sp] <= lim[sp] for sp in ratios), "value": ratios, "limit": lim}
+    g["a"] = {"pass": ratios["test"] <= gates["a_test_ratio"], "value": ratios["test"], "limit": gates["a_test_ratio"],
+              "benchmark_ratio_reference": ratios.get("benchmark")}                  # benchmark は参考値
     if windows is not None:
+        m, an = windows["methods"]["model"]["rmse_q_deg"], windows["methods"]["analytic"]["rmse_q_deg"]
         h = str(windows["horizon"])
-        v = windows["methods"]["model"]["rmse_q_deg"][h]
-        r4 = windows["methods"]["model"]["rmse_q_deg"].get("4000")
-        g["b"] = {"pass": v <= gates["b_deg"][kind], "value": v, "analytic": windows["methods"]["analytic"]["rmse_q_deg"][h],
-                  "limit": gates["b_deg"][kind],
-                  # 参考値（合否には使わない）: 4,000 ステップ（0.5 秒）。θ=0 まわりの不安定性による増幅の影響が小さい
-                  "value_4000": r4, "analytic_4000": windows["methods"]["analytic"]["rmse_q_deg"].get("4000")}
+        g["b"] = {"pass": m["4000"] <= gates["b_deg_4000"], "value": m["4000"], "analytic": an["4000"], "limit": gates["b_deg_4000"],
+                  "value_8000_reference": m.get(h), "analytic_8000_reference": an.get(h)}
     nd = sum(r["model"]["diverged"] for r in closed)
     worst = max(r["model"]["vs_truth_rmse_q_deg"] for r in closed)
     g["c"] = {"pass": nd == 0 and worst <= gates["c_deg"], "n_diverged": int(nd), "worst_rmse_deg": worst,
