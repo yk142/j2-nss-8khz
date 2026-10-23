@@ -6,6 +6,8 @@ function mdl = buildJ2Plant(opts)
 %     opts.slxPath    保存先                   (既定 <dataDir>/models/j2_plant.slx)
 %     opts.urdfPath   中間 URDF の保存先       (既定 slxPath と同じフォルダ)
 %     opts.qFixed     固定軸の角度 [1x6 rad]   (既定 j2_config の qFixed。J2 の値は無視)
+%     opts.noFriction true で摩擦を 0 にする（検証用。既定 false）
+%     opts.flex       弾性（二慣性）の設定。空なら剛体（既定）。buildJ2FlexPlant が設定する。addJ2Flex 参照
 %
 %   共通 I/F:
 %     Inport  'tau' [スカラ] (N*m) → Outport 'q' [rad], 'dq' [rad/s]（いずれもスカラ）
@@ -74,8 +76,15 @@ set_param(sprintf('%s/joint%d',mdl,J),'Name','joint1');
 p1 = p;  p1.nJoints = 1;
 p1.armature   = p.armature(J);     p1.frictionFc  = p.frictionFc(J);
 p1.frictionBv = p.frictionBv(J);   p1.frictionEps = p.frictionEps(J);
+if isfield(opts,'noFriction') && opts.noFriction      % 検証用: 摩擦なし（エネルギー・減衰の確認）
+    p1.frictionFc = 0*p1.frictionFc;  p1.frictionBv = 0*p1.frictionBv;
+end
 addC8Actuation(mdl, p1);
-addC8Armature(mdl, p1);
+if isfield(opts,'flex') && ~isempty(opts.flex)
+    addJ2Flex(mdl, p1, opts.flex);       % 二慣性（減速機のねじり弾性。docs/requirements_flex.md）
+else
+    addC8Armature(mdl, p1);
+end
 addC8Friction(mdl, p1);
 
 save_system(mdl, opts.slxPath);
