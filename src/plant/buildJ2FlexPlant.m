@@ -17,12 +17,7 @@ for i = 1:numel(f)
 end
 c = j2_setup_path();
 if ~isfield(opts,'slxPath') || isempty(opts.slxPath), opts.slxPath = fullfile(c.dataDir,'models',[opts.modelName '.slx']); end
-p = c8_params(c.meshDir);  jp = j2Params();
-flex.Jm = p.armature(c.jointIdx);  flex.JL = jp.M - flex.Jm;
-Jeq = flex.Jm*flex.JL/(flex.Jm + flex.JL);
-flex.k = (2*pi*opts.fRes)^2/(1/flex.Jm + 1/flex.JL);
-flex.c = 2*opts.zetaTors*sqrt(flex.k*Jeq);
-flex.fRes = opts.fRes;  flex.zeta = opts.zetaTors;
+flex = j2FlexParams(opts.fRes, opts.zetaTors);
 flex.k = flex.k*opts.kScale;  flex.c = flex.c*opts.cScale;
 bo = rmfield(opts, {'fRes','zetaTors','kScale','cScale'});
 bo.flex = flex;

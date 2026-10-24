@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "name": "すべて有限",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "|tau| <= tauPeak",
+      "pass": true,
+      "value": 860.4
+    },
+    {
+      "name": "|dq| < 1.3·qdMax（リンク。弾性で励振バリアを超えうる）",
+      "pass": true,
+      "value": 6.1928749768849016
+    },
+    {
+      "name": "|dqm| < qdMax（モータ。バリアの制御対象）",
+      "pass": true,
+      "value": 4.8663993877068874
+    },
+    {
+      "name": "リンク角がリミットから 0.1° を超えて内側（接触なし）",
+      "pass": true,
+      "value": 0.83643707540785406
+    },
+    {
+      "name": "atLimit の遷移が 0 件",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "|ねじり| <= 3 × 最大トルクの静的たわみ（破綻の検出）",
+      "pass": true,
+      "value": [
+        0.046409808117043205,
+        0.03815007865523181
+      ]
+    },
+    {
+      "name": "contact_* と nearlimit を含まない",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "配列長の整合",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "シナリオ名が一意",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "benchmark は split=benchmark のみ",
+      "pass": true,
+      "value": 12
+    },
+    {
+      "name": "train/val/test がそろっている（100 本以上のとき）",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "シナリオ表が j2ScenarioSet(preset) と一致（名前・split・シード）",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "正規化統計 = train の統計",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "name": "二慣性の解析モデルの 1 ステップ加速度残差 / 加速度 RMS < 0.5（ddq・ddqm）",
+      "pass": true,
+      "value": [
+        0.005440805295479606,
+        0.013445365800730708
+      ]
+    }
+  ],
+  "metrics": {
+    "nearLimitTransitions": 1112,
+    "minDistToLimitDeg": 0.83643707540785406,
+    "maxTwistRad": 0.046409808117043205,
+    "staticTwistAtPeakRad": 0.03815007865523181,
+    "modelResidualRatio": [
+      0.005440805295479606,
+      0.013445365800730708
+    ],
+    "modelResidualRMS": [
+      0.091590143443644356,
+      0.25034613546695911
+    ],
+    "nTransition": 1.939748E+7
+  },
+  "nErrors": 0
+}

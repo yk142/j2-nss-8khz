@@ -2,6 +2,7 @@ function ds = genJ2Dataset(opts)
 %GENJ2DATASET シナリオを実行して J2 単軸の学習データセットを生成する。
 %   ds = GENJ2DATASET(opts)
 %     opts.preset    'full'（既定）| 'small' | 'nss8k' | 'nss8k_small'（接触なし 8 kHz。キャッシュは double）
+%                   | 'nss8kflex' | 'nss8kflex_small'（同じシナリオ表を弾性プラントで実行。qm, dqm も保存）
 %     opts.outDir    保存先（既定 <repo>/data）。cache/ と データセット .mat を置く
 %     opts.shard     [i n]: n 分割したうちの i 番目だけ新規生成する（複数の MATLAB プロセスで分担）
 %     opts.maxScen   1 回の呼び出しで新規生成するシナリオ数の上限（既定 Inf）
@@ -42,18 +43,26 @@ if ~isempty(mine)
     workDir = tempname;  mkdir(workDir);                 % Simscape のキャッシュをプロセスごとに分離
     oldDir = cd(workDir);
     cleanWork = onCleanup(@() cleanupWork(oldDir, workDir));   % 終了時に cwd を戻し、作業フォルダを削除
-    mE = buildJ2Excitation(struct('modelName','j2_excite','slxPath',fullfile(workDir,'j2_excite.slx')));
-    mC = buildJ2ClosedLoop(struct('modelName','j2_closedloop','slxPath',fullfile(workDir,'j2_closedloop.slx')));
-    models = struct('excite',mE,'closed',mC);
+    isFlex = startsWith(opts.preset,'nss8kflex');
+    if isFlex
+        [mE, flexE] = buildJ2FlexExcitation(struct('modelName','j2_flex_excite','slxPath',fullfile(workDir,'j2_flex_excite.slx')));
+        [mC, flexC] = buildJ2FlexClosedLoop(struct('modelName','j2_flex_closedloop','slxPath',fullfile(workDir,'j2_flex_closedloop.slx')));
+        models = struct('excite',mE,'closed',mC,'flex',flexC);
+    else
+        mE = buildJ2Excitation(struct('modelName','j2_excite','slxPath',fullfile(workDir,'j2_excite.slx')));
+        mC = buildJ2ClosedLoop(struct('modelName','j2_closedloop','slxPath',fullfile(workDir,'j2_closedloop.slx')));
+        models = struct('excite',mE,'closed',mC);
+    end
     nNew = 0;
     for k = mine
         if nNew >= opts.maxScen, break; end
         s = S(k);  t0 = tic;
-        raw = runJ2Scenario(s, models);
+        if isFlex, raw = runJ2ScenarioFlex(s, models); else, raw = runJ2Scenario(s, models); end
         cast = @single;  if startsWith(opts.preset,'nss8k'), cast = @double; end   % nss8k は倍精度（q の丸めが 2 次の項に効くため）
         e = struct('name',s.name,'q',cast(raw.q),'dq',cast(raw.dq),'tau',cast(raw.tau), ...
             'qref',cast(raw.qref),'q0',raw.q0,'dq0',raw.dq0,'contact8k',raw.contact,'fs',jp.fsSim, ...
             'wall',toc(t0)); %#ok<NASGU>
+        if isFlex, e.qm = cast(raw.qm);  e.dqm = cast(raw.dqm); end
         tmp = [cacheFn(s) '.tmp'];  save(tmp, 'e');  movefile(tmp, cacheFn(s));   % 書き込み途中のファイルを残さない
         nNew = nNew + 1;
         fprintf('  [%3d/%3d] %-18s %-10s %6.1f s 実行 %5.1f s 経過\n', k, numel(S), s.name, s.type, raw.t(end), toc(t0));
@@ -68,7 +77,9 @@ if any(arrayfun(@(s) ~isfile(cacheFn(s)), S))
     fprintf('未生成のシナリオが残っています。同じ引数で再実行すると続きから生成します。\n');
     return;
 end
-if startsWith(opts.preset,'nss8k')
+if startsWith(opts.preset,'nss8kflex')
+    ds = assembleJ2Dataset8kFlex(S, cacheFn, opts, jp);
+elseif startsWith(opts.preset,'nss8k')
     ds = assembleJ2Dataset8k(S, cacheFn, opts, jp);     % 8 kHz のまま（間引きなし）
 else
     ds = assembleJ2Dataset(S, cacheFn, opts, jp);
