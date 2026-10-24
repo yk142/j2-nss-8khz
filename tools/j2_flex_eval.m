@@ -14,8 +14,9 @@ names = {'ptp_v40_001','ptp_v40_003','ptp_v60_001','ptp_v60_002','ptp_v80_001','
 tmp = tempname;  mkdir(tmp);
 [mN, flexN] = buildJ2FlexClosedLoop(struct('modelName','jfe_nom','slxPath',fullfile(tmp,'jfe_nom.slx')));
 [mD, flexD] = buildJ2FlexClosedLoop(struct('modelName','jfe_dig','slxPath',fullfile(tmp,'jfe_dig.slx'),'ctrlTs',1e-3));
+[mR, flexR] = buildJ2FlexClosedLoop(struct('modelName','jfe_rigid','slxPath',fullfile(tmp,'jfe_rigid.slx'),'ctrlTs',1e-3,'kScale',100,'cScale',10));
 [mS, flexS] = buildJ2FlexClosedLoop(struct('modelName','jfe_soft','slxPath',fullfile(tmp,'jfe_soft.slx'),'kScale',0.7));
-cleanup = onCleanup(@() cellfun(@close_if_loaded, {mN, mS, mD}));
+cleanup = onCleanup(@() cellfun(@close_if_loaded, {mN, mS, mD, mR}));
 refs = makeRefs(names, jp, dt);
 res = struct('cond',{},'wn',{},'zeta',{},'trackRmsDeg',{},'settleTwist',{},'decayTime',{},'tauRms',{},'tauMax',{},'twistDyn',{},'diverged',{});
 for ci = 1:numel(conds)
@@ -24,7 +25,8 @@ for ci = 1:numel(conds)
     if strcmp(c,'C2'), mdl = mS; fl = flexS; ff.flexFf = flexN; end
     if strcmp(c,'C3'), ff.ffScale = 0.85; end
     if strcmp(c,'C4'), mdl = mD; fl = flexD; end
-    wns = [15 30 60 90 120];  if strcmp(c,'C4'), wns = [wns 180 240]; end
+    if strcmp(c,'C5'), mdl = mR; fl = flexR; end      % C4 と同じ遅れで、剛性 100 倍（共振 約 200 Hz、ほぼ剛体）
+    wns = [15 30 60 90 120];  if any(strcmp(c,{'C4','C5'})), wns = [wns 180 240]; end
     for wn = wns
         for zeta = [0.7 1 1.5]
             m = nan(numel(names),6);  div = false;
