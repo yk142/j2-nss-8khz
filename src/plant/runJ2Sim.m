@@ -5,7 +5,8 @@ function out = runJ2Sim(mdl, tVec, U, q0, dq0)
 %     tVec  時刻列 [N x 1] [s]（先頭 0。ソルバ刻み 8 kHz の格子に載せること）
 %     U     入力列 [N x nIn]（モデルの Inport 幅に一致）
 %     q0, dq0  初期角度 [rad]・角速度 [rad/s]
-%   out: .t .q .dq（スカラ状態）、.tau（3 番目の Outport があれば実印加トルク、無ければ空）
+%   out: .t .q .dq（スカラ状態）、.tau（3 番目の Outport があれば実印加トルク、無ければ空）、
+%        .qm .dqm（5 本の Outport がある弾性モデルのときだけ。モータ角・角速度）
 if nargin < 5, dq0 = 0; end
 tVec = tVec(:);
 assert(size(U,1) == numel(tVec), 'runJ2Sim:size', 'tVec と U の行数が一致しません');
@@ -29,5 +30,9 @@ if y.numElements >= 3
     if numel(out.tau) ~= numel(out.t)
         out.tau = interp1(tauTS.Time, out.tau, out.t, 'previous', 'extrap');
     end
+end
+if y.numElements >= 5
+    out.qm  = y.getElement(4).Values.Data(:,1);
+    out.dqm = y.getElement(5).Values.Data(:,1);
 end
 end

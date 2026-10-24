@@ -1,9 +1,10 @@
 function S = j2ScenarioSet(preset)
 %J2SCENARIOSET 学習データ生成のシナリオ表を返す（引継ぎ資料の収集計画を J2 実値で再計算）。
-%   S = J2SCENARIOSET(preset)   preset = 'full'（既定）| 'small'（テスト・動作確認用）| 'nss8k' | 'nss8k_small'
+%   S = J2SCENARIOSET(preset)   preset = 'full'（既定）| 'small'（テスト・動作確認用）| 'nss8k' | 'nss8k_small' | 'nss8kflex' | 'nss8kflex_small'
 %     'nss8k' は 8 kHz NSS 用の接触なし版（docs/requirements_8khz.md）。full から contact_* と
 %     nearlimit を除く。シード・Sobol 割り当て・split は full と同一（除外は最後に行う）。
 %     'nss8k_small' は同じ除外をした small（動作確認用）。
+%     'nss8kflex' / 'nss8kflex_small' は同じシナリオ表（弾性プラントで実行する。docs/requirements_nss_flex.md）。
 %
 %   S は構造体配列。主なフィールド:
 %     name, pattern, type ('excitation'|'hold'|'ptp'), phase (1|2|3 = リミット接触|'benchmark'), split
@@ -21,7 +22,7 @@ function S = j2ScenarioSet(preset)
 %   データセット側でフラグを付ける。
 if nargin < 1, preset = 'full'; end
 presetIn = preset;
-if strcmp(preset,'nss8k'), preset = 'full'; elseif strcmp(preset,'nss8k_small'), preset = 'small'; end
+if any(strcmp(preset,{'nss8k','nss8kflex'})), preset = 'full'; elseif any(strcmp(preset,{'nss8k_small','nss8kflex_small'})), preset = 'small'; end
 jp = j2Params();
 c  = j2_config();
 d2r = pi/180;
