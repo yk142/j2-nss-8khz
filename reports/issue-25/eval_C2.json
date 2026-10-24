@@ -1,0 +1,167 @@
+[
+  {
+    "cond": "C2",
+    "wn": 15,
+    "zeta": 0.7,
+    "trackRmsDeg": 0.096385376407462434,
+    "settleTwist": 8.01769278048522E-6,
+    "decayTime": null,
+    "tauRms": 101.48439401089983,
+    "tauMax": 343.38229648438278,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 15,
+    "zeta": 1,
+    "trackRmsDeg": 0.095364424650441412,
+    "settleTwist": 7.1117527735515293E-6,
+    "decayTime": null,
+    "tauRms": 101.46805285400319,
+    "tauMax": 342.41563609735255,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 15,
+    "zeta": 1.5,
+    "trackRmsDeg": 0.096080756085330066,
+    "settleTwist": 5.6201363359221368E-6,
+    "decayTime": null,
+    "tauRms": 101.54579194234789,
+    "tauMax": 355.40492288012962,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 30,
+    "zeta": 0.7,
+    "trackRmsDeg": 0.0959417997210299,
+    "settleTwist": 2.2441989680110007E-5,
+    "decayTime": null,
+    "tauRms": 101.30209117895295,
+    "tauMax": 350.06107804703657,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 30,
+    "zeta": 1,
+    "trackRmsDeg": 0.097519911252050492,
+    "settleTwist": 2.306363896390383E-5,
+    "decayTime": null,
+    "tauRms": 101.58772762174755,
+    "tauMax": 383.76915909500116,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 30,
+    "zeta": 1.5,
+    "trackRmsDeg": 0.0994134678624158,
+    "settleTwist": 2.028104603860968E-5,
+    "decayTime": null,
+    "tauRms": 102.13053309038609,
+    "tauMax": 476.02381293106328,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 60,
+    "zeta": 0.7,
+    "trackRmsDeg": 0.10102833966001708,
+    "settleTwist": 3.4745918326354508E-5,
+    "decayTime": null,
+    "tauRms": 101.9846877437581,
+    "tauMax": 469.07039389056109,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 60,
+    "zeta": 1,
+    "trackRmsDeg": 0.10203100825901422,
+    "settleTwist": 2.3443548490967884E-5,
+    "decayTime": null,
+    "tauRms": 102.62631804031177,
+    "tauMax": 547.27781683997682,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 60,
+    "zeta": 1.5,
+    "trackRmsDeg": 0.10427464884653903,
+    "settleTwist": 3.0112061190462876E-5,
+    "decayTime": null,
+    "tauRms": 103.54926625450874,
+    "tauMax": 621.97510397925214,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 90,
+    "zeta": 0.7,
+    "trackRmsDeg": 0.10464138811348851,
+    "settleTwist": 2.2585135989281296E-5,
+    "decayTime": null,
+    "tauRms": 102.91099080628165,
+    "tauMax": 571.11404711241391,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 90,
+    "zeta": 1,
+    "trackRmsDeg": 0.10582869391976302,
+    "settleTwist": 2.6496764552354683E-5,
+    "decayTime": null,
+    "tauRms": 103.66768963922436,
+    "tauMax": 623.23388066561222,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 90,
+    "zeta": 1.5,
+    "trackRmsDeg": 0.10801428741817609,
+    "settleTwist": 1.9479931679422723E-5,
+    "decayTime": null,
+    "tauRms": 104.74236779665982,
+    "tauMax": 667.03210312921954,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 120,
+    "zeta": 0.7,
+    "trackRmsDeg": 0.10781201584945577,
+    "settleTwist": 1.7204846405118346E-5,
+    "decayTime": null,
+    "tauRms": 103.82008740388234,
+    "tauMax": 622.52485667359247,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 120,
+    "zeta": 1,
+    "trackRmsDeg": 0.10878622284636767,
+    "settleTwist": 1.2741897203518467E-5,
+    "decayTime": null,
+    "tauRms": 104.63489604418869,
+    "tauMax": 660.89728716012189,
+    "diverged": false
+  },
+  {
+    "cond": "C2",
+    "wn": 120,
+    "zeta": 1.5,
+    "trackRmsDeg": 0.11068042146595404,
+    "settleTwist": 1.4373018489552545E-5,
+    "decayTime": null,
+    "tauRms": 105.67921872434748,
+    "tauMax": 685.92706268219717,
+    "diverged": false
+  }
+]
