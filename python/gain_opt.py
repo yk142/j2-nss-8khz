@@ -21,17 +21,19 @@ from nss8kflex.data import load  # noqa: E402
 from nss8kflex.model import build_model  # noqa: E402
 from nss8kflex.physics import FlexPhysics  # noqa: E402
 
-OUT = "reports/issue-39"
-WN0, WN_RATIO, N_WN = 15.0, 1.1, 32
-ZETAS = [round(0.5 + 0.1 * i, 1) for i in range(16)]
-WNS = [WN0 * WN_RATIO ** i for i in range(N_WN)]
-GRID = [(w, z) for w in WNS for z in ZETAS]
-NORM = c4.NORM_GAIN
-CHUNK = 96
-
-
 def key(wn, z):
     return (round(float(wn), 3), round(float(z), 3))
+
+
+OUT = "reports/issue-41"                     # 出力先。#39 の走査結果は OUT_OLD から読み、新しい格子点だけを OUT に足す
+OUT_OLD = "reports/issue-39"
+WN0, WN_RATIO, N_WN = 15.0, 1.1, 41          # wn = 15〜680 rad/s（#39 は 32 点で 288 まで）
+ZETAS = [round(0.1 + 0.1 * i, 1) for i in range(20)]     # ζ = 0.1〜2.0（#39 は 0.5〜2.0）
+WNS = [WN0 * WN_RATIO ** i for i in range(N_WN)]
+GRID = [(w, z) for w in WNS for z in ZETAS]
+OLD_GRID = {key(WN0 * WN_RATIO ** i, round(0.5 + 0.1 * j, 1)) for i in range(32) for j in range(16)}
+NORM = c4.NORM_GAIN
+CHUNK = 96
 
 
 def make_step(run, p, fl, dt, out_root):
@@ -82,21 +84,26 @@ def cmd_scan(a):
     d = load(a.data, splits=("benchmark",))
     p, fl, dt = d["physics"], d["flex"], d["dt"]
     refs = c4.load_refs(a.refs)
-    gains = GRID + [NORM]
+    gains = [g for g in GRID if key(*g) not in OLD_GRID] + [NORM]       # #39 で走査済みの格子点は再利用
     for run in a.runs:
         path = os.path.join(OUT, f"scan_{run}.json")
         if os.path.exists(path):
             continue
         t0 = time.time()
-        rows = mark_margin(scan_rows(make_step(run, p, fl, dt, a.out_root), refs, p, fl, dt, gains))
+        rows = scan_rows(make_step(run, p, fl, dt, a.out_root), refs, p, fl, dt, gains)
         json.dump({"run": run, "rows": rows}, open(path, "w"))
+        rows = load_scan(run)
         o1, o0 = optimum(rows, True), optimum(rows, False)
         f = lambda r: f"(wn {r['wn']:.1f}, ζ {r['zeta']:.1f}, J {r['J']:.3f})" if r else "なし"
         print(f"[{run}] {time.time() - t0:.0f}s  安定 {sum(not r['unstable'] for r in rows)}/{len(rows)}  最適（余裕あり）{f(o1)}  最適（余裕なし）{f(o0)}", flush=True)
 
 
 def load_scan(run):
-    return json.load(open(os.path.join(OUT, f"scan_{run}.json")))["rows"]
+    """#39 の走査（OUT_OLD）と、新しい格子点（OUT）をつないで返す。J は同じ (30, 1) で正規化済み。余裕は広い格子で付け直す。"""
+    old = json.load(open(os.path.join(OUT_OLD, f"scan_{run}.json")))["rows"]
+    new = json.load(open(os.path.join(OUT, f"scan_{run}.json")))["rows"]
+    rows = [r for r in old if key(r["wn"], r["zeta"]) != key(*NORM)] + [r for r in new if key(r["wn"], r["zeta"]) != key(*NORM)]
+    return mark_margin(rows)
 
 
 def cmd_select(a):
@@ -104,7 +111,7 @@ def cmd_select(a):
     pick = {}                                           # key -> 理由
 
     def add(wn, z, why):
-        if min(WNS) * 0.999 <= wn <= max(WNS) * 1.001 and 0.499 <= z <= 2.001:
+        if min(WNS) * 0.999 <= wn <= max(WNS) * 1.001 and 0.099 <= z <= 2.001:
             pick.setdefault(key(wn, z), []).append(why)
     for run in runs:
         rows = load_scan(run)
@@ -122,7 +129,7 @@ def cmd_select(a):
         wb = boundary(base, z)
         if wb:
             add(wb / WN_RATIO, z, f"{a.base} 境界の手前 ζ={z}"); add(wb, z, f"{a.base} 境界の向こう ζ={z}")
-    exist = {key(r["wn"], r["zeta"]) for r in c4.add_J(json.load(open("reports/issue-25/eval_C4.json")))}
+    exist = set(truth_all())
     todo = [k for k in pick if k not in exist]
     out = {"gains": [list(k) for k in todo], "reasons": {f"{k[0]},{k[1]}": v for k, v in pick.items()}}
     json.dump(out, open(os.path.join(OUT, "verify_gains.json"), "w"), indent=1, ensure_ascii=False)
@@ -134,9 +141,10 @@ def cmd_select(a):
 def truth_all():
     """既存の 21 ゲイン（#25）＋検証用ゲイン（issue #39）の真値。J は (30, 1) の真値で正規化。"""
     rows = json.load(open("reports/issue-25/eval_C4.json"))
-    path = os.path.join(OUT, "truth_verify.json")
-    if os.path.exists(path):
-        rows += json.load(open(path))
+    for d in (OUT_OLD, OUT):
+        path = os.path.join(d, "truth_verify.json")
+        if os.path.exists(path):
+            rows += json.load(open(path))
     seen, uniq = set(), []
     for r in rows:
         k = key(r["wn"], r["zeta"])
