@@ -1,0 +1,246 @@
+{
+ "run": "B_w128_screen",
+ "rows": [
+  {
+   "wn": 15,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.04687215119829665,
+   "settleTwist": 3.5928281063477107e-06,
+   "tauRms": 101.74127816490683,
+   "tauMax": 359.07766622418177,
+   "diverged": false,
+   "J": 1.0880960595089921,
+   "unstable": false
+  },
+  {
+   "wn": 15,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.037338924301842276,
+   "settleTwist": 3.2378655021109354e-06,
+   "tauRms": 101.4805083645204,
+   "tauMax": 358.2885873353639,
+   "diverged": false,
+   "J": 0.885006207331787,
+   "unstable": false
+  },
+  {
+   "wn": 15,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.028613275042229044,
+   "settleTwist": 2.4235518144336494e-06,
+   "tauRms": 101.26176754329771,
+   "tauMax": 388.7981567805128,
+   "diverged": false,
+   "J": 0.6753958271908068,
+   "unstable": false
+  },
+  {
+   "wn": 30,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.032800151601972465,
+   "settleTwist": 1.4558847737366454e-05,
+   "tauRms": 101.13532910556093,
+   "tauMax": 382.642778418696,
+   "diverged": false,
+   "J": 1.3452915399158423,
+   "unstable": false
+  },
+  {
+   "wn": 30,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.025643077561362113,
+   "settleTwist": 1.0314600710759879e-05,
+   "tauRms": 101.15934808948357,
+   "tauMax": 466.5341229887005,
+   "diverged": false,
+   "J": 1.0,
+   "unstable": false
+  },
+  {
+   "wn": 30,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.01864453189400019,
+   "settleTwist": 9.029699524472145e-06,
+   "tauRms": 101.62880713066045,
+   "tauMax": 593.5943792933904,
+   "diverged": false,
+   "J": 0.8012537283018912,
+   "unstable": false
+  },
+  {
+   "wn": 60,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.017151673053346035,
+   "settleTwist": 6.3895015026658095e-06,
+   "tauRms": 101.14881627948803,
+   "tauMax": 587.2695132223995,
+   "diverged": false,
+   "J": 0.6441617801714823,
+   "unstable": false
+  },
+  {
+   "wn": 60,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.013206244822110537,
+   "settleTwist": 5.982611869497403e-06,
+   "tauRms": 102.26287738055403,
+   "tauMax": 646.0043959004449,
+   "diverged": false,
+   "J": 0.5475081216145148,
+   "unstable": false
+  },
+  {
+   "wn": 60,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.01055333568771248,
+   "settleTwist": 2.852023089128429e-06,
+   "tauRms": 104.33372185058357,
+   "tauMax": 682.2737069418866,
+   "diverged": false,
+   "J": 0.34402532364224014,
+   "unstable": false
+  },
+  {
+   "wn": 90,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.010001398863156713,
+   "settleTwist": 1.7264210934337335e-06,
+   "tauRms": 102.53990801015088,
+   "tauMax": 662.5927525337477,
+   "diverged": false,
+   "J": 0.2786998894472791,
+   "unstable": false
+  },
+  {
+   "wn": 90,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.008485797322194996,
+   "settleTwist": 7.63812342350088e-07,
+   "tauRms": 104.40021760471977,
+   "tauMax": 684.3364679363734,
+   "diverged": false,
+   "J": 0.2024855902213642,
+   "unstable": false
+  },
+  {
+   "wn": 90,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.009494562189686083,
+   "settleTwist": 2.529631994659473e-06,
+   "tauRms": 109.06082090271188,
+   "tauMax": 720.5562307665182,
+   "diverged": false,
+   "J": 0.3077529926167415,
+   "unstable": false
+  },
+  {
+   "wn": 120,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.007487672898325046,
+   "settleTwist": 8.133439951699063e-07,
+   "tauRms": 104.31707660142122,
+   "tauMax": 682.397024476063,
+   "diverged": false,
+   "J": 0.185424766966371,
+   "unstable": false
+  },
+  {
+   "wn": 120,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.007519829803561705,
+   "settleTwist": 1.3551720338435659e-06,
+   "tauRms": 107.33492058506941,
+   "tauMax": 711.3857779811786,
+   "diverged": false,
+   "J": 0.2123168764623482,
+   "unstable": false
+  },
+  {
+   "wn": 120,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.010302324756401889,
+   "settleTwist": 3.76597228352377e-06,
+   "tauRms": 151.03453152966816,
+   "tauMax": 743.7549623678414,
+   "diverged": false,
+   "J": 0.38343466547194605,
+   "unstable": false
+  },
+  {
+   "wn": 180,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.006729191493096161,
+   "settleTwist": 7.645319408281104e-07,
+   "tauRms": 109.69837187578385,
+   "tauMax": 724.6083002758477,
+   "diverged": false,
+   "J": 0.16826940000979504,
+   "unstable": false
+  },
+  {
+   "wn": 180,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.010343069123708575,
+   "settleTwist": 0.00025265665477531635,
+   "tauRms": 539.9385904742177,
+   "tauMax": 860.4,
+   "diverged": false,
+   "J": 12.449198448937622,
+   "unstable": true
+  },
+  {
+   "wn": 180,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.04469372922162426,
+   "settleTwist": 0.0002885762631713407,
+   "tauRms": 717.2761355930111,
+   "tauMax": 860.4,
+   "diverged": false,
+   "J": 14.86018480008141,
+   "unstable": true
+  },
+  {
+   "wn": 240,
+   "zeta": 0.7,
+   "trackRmsDeg": 0.00653106917768487,
+   "settleTwist": 0.00016052332730597237,
+   "tauRms": 306.40662172834726,
+   "tauMax": 783.1429912214486,
+   "diverged": false,
+   "J": 7.908709755858496,
+   "unstable": true
+  },
+  {
+   "wn": 240,
+   "zeta": 1.0,
+   "trackRmsDeg": 0.024438575174897142,
+   "settleTwist": 0.0003169933467297657,
+   "tauRms": 706.5214882741715,
+   "tauMax": 860.4,
+   "diverged": false,
+   "J": 15.842758284652785,
+   "unstable": true
+  },
+  {
+   "wn": 240,
+   "zeta": 1.5,
+   "trackRmsDeg": 0.0431553141584089,
+   "settleTwist": 0.00032111397829802856,
+   "tauRms": 760.6114769645887,
+   "tauMax": 860.4,
+   "diverged": false,
+   "J": 16.40745299759614,
+   "unstable": true
+  }
+ ],
+ "compare": {
+  "n_gains": 21,
+  "n_class_match": 21,
+  "class_pass": true,
+  "mismatch": [],
+  "n_stable_truth": 16,
+  "spearman_J": 0.9970588235294118,
+  "spearman_track": 0.9970588235294118,
+  "spearman_pass": true
+ }
+}
