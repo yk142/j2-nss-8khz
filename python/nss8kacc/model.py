@@ -1,6 +1,7 @@
 """加速度を状態に持つ残差型 NSS（docs/requirements_nss_resid_state.md）。
 
 状態 acc（直前の区間の加速度）、入力 [τ, q, dq]。NN の入力 [acc, τ, q, dq]、出力 Δacc、acc₁ = acc + Δacc。
+位置の入力は feat="q"（生の q、基本形）か "sincos"（sin q, cos q の 2 列、アブレーション）。
 ロールアウト: 速度は前進オイラー（dq₁ = dq + Δt·acc₁）、位置は台形則（q₁ = q + Δt/2·(dq + dq₁)）。
 最後の層は 0 初期化（恒等写像 acc₁ = acc から始める）。入力は train の平均・標準偏差で標準化する。
 
@@ -28,10 +29,10 @@ def _mlp(d_in, width, depth):
 class AccNSS(nn.Module):
     kind = "acc"
     residual = False          # evaluate_nss の kind 判定用（解析モデルを使わない）
-    n_in = 4
-
-    def __init__(self, scale, dt, phys_params, width=64, depth=3):
+    def __init__(self, scale, dt, phys_params, width=64, depth=3, feat="q"):
         super().__init__()
+        self.feat = feat
+        self.n_in = 5 if feat == "sincos" else 4
         self.scale, self.dt = dict(scale), float(dt)
         self.phys_params = dict(phys_params)
         self.width, self.depth = int(width), int(depth)
@@ -44,11 +45,12 @@ class AccNSS(nn.Module):
 
     def config(self):
         return {"kind": self.kind, "width": self.width, "depth": self.depth, "scale": self.scale,
-                "dt": self.dt, "phys_params": self.phys_params}
+                "dt": self.dt, "phys_params": self.phys_params, "feat": self.feat}
 
     def features(self, acc, q, dq, tau):
         s = self.scale
-        return torch.stack([acc / s["DDQ_SCALE"], tau / s["TAU_MAX"], q, dq / s["DTHETA_MAX"]], dim=-1).float()
+        pos = [torch.sin(q), torch.cos(q)] if self.feat == "sincos" else [q]
+        return torch.stack([acc / s["DDQ_SCALE"], tau / s["TAU_MAX"], *pos, dq / s["DTHETA_MAX"]], dim=-1).float()
 
     def net_out(self, feat):
         return self.net((feat - self.x_mean) / self.x_std)
@@ -71,4 +73,4 @@ class AccNSS(nn.Module):
 
 
 def build_model(config):
-    return AccNSS(config["scale"], config["dt"], config["phys_params"], config["width"], config["depth"])
+    return AccNSS(config["scale"], config["dt"], config["phys_params"], config["width"], config["depth"], config.get("feat", "q"))

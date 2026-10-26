@@ -29,6 +29,7 @@ def parse(argv=None):
     p.add_argument("--out-root", default="data/train_nss8kacc")
     p.add_argument("--width", type=int, default=64)
     p.add_argument("--depth", type=int, default=3)
+    p.add_argument("--feat", choices=("q", "sincos"), default="q", help="位置の入力: 生の q、または sin q・cos q")
     p.add_argument("--epochs", type=int, default=20)
     p.add_argument("--batch", type=int, default=4096)
     p.add_argument("--lr", type=float, default=2e-3)
@@ -59,13 +60,13 @@ def main(argv=None):
 
     d = load(a.data, splits=("train", "val"))
     scale, phys, dt = d["scale"], d["physics"], d["dt"]
-    Ftr, Dtr = build_xy(d["splits"]["train"], scale)
-    Fva, Dva = build_xy(d["splits"]["val"], scale)
+    Ftr, Dtr = build_xy(d["splits"]["train"], scale, a.feat)
+    Fva, Dva = build_xy(d["splits"]["val"], scale, a.feat)
     del d["splits"]
     if a.max_train and a.max_train < len(Ftr):
         idx = torch.from_numpy(np.sort(np.random.permutation(len(Ftr))[:a.max_train]))
         Ftr, Dtr = Ftr[idx], Dtr[idx]
-    model = AccNSS(scale, dt, phys, a.width, a.depth)
+    model = AccNSS(scale, dt, phys, a.width, a.depth, a.feat)
     model.x_mean.copy_(Ftr.mean(0)); model.x_std.copy_(Ftr.std(0))
     model.d_std.copy_(Dtr.std().clamp_min(1e-6))
     unit = float(model.d_std)                            # 損失の平方根 × unit = Δacc の RMS [rad/s²]

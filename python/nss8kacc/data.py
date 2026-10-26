@@ -13,8 +13,9 @@ def pairs(split):
     return Y[i - 1], R[i, 0], R[i, 1], R[i, 2], Y[i]
 
 
-def build_xy(split, scale):
+def build_xy(split, scale, feat="q"):
     """特徴量 F（標準化前、float32）と標的 Δacc = Y[k] − Y[k-1]（rad/s²、float32）。"""
     acc, q, dq, tau, y = pairs(split)
-    F = np.stack([acc / scale["DDQ_SCALE"], tau / scale["TAU_MAX"], q, dq / scale["DTHETA_MAX"]], axis=1).astype(np.float32)
+    pos = [np.sin(q), np.cos(q)] if feat == "sincos" else [q]
+    F = np.stack([acc / scale["DDQ_SCALE"], tau / scale["TAU_MAX"], *pos, dq / scale["DTHETA_MAX"]], axis=1).astype(np.float32)
     return torch.from_numpy(F), torch.from_numpy((y - acc).astype(np.float32))
