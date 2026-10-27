@@ -29,6 +29,8 @@ def parse(argv=None):
     p.add_argument("--out-root", default="data/train_nss8kacc")
     p.add_argument("--width", type=int, default=64)
     p.add_argument("--depth", type=int, default=3)
+    p.add_argument("--acc-noise", type=float, default=0.0,
+                   help="学習時に入力 acc へ加えるガウスノイズの標準偏差 [rad/s²]。標的は y − acc_ノイズ入り（0 は基本形）")
     p.add_argument("--feat", choices=("q", "sincos"), default="q", help="位置の入力: 生の q、または sin q・cos q")
     p.add_argument("--epochs", type=int, default=20)
     p.add_argument("--batch", type=int, default=4096)
@@ -97,7 +99,12 @@ def main(argv=None):
             idx = perm[i:i + a.batch]
             for g in opt.param_groups:
                 g["lr"] = lr_at(step)
-            loss = torch.mean((model.net_out(Ftr[idx])[:, 0] - Ttr[idx]) ** 2)
+            Fb, Tb = Ftr[idx], Ttr[idx]
+            if a.acc_noise > 0:                          # acc にノイズを足し、出力 acc₁ が真値になるよう標的を補正する
+                n = torch.randn(len(idx)) * a.acc_noise
+                Fb = Fb.clone(); Fb[:, 0] += n / scale["DDQ_SCALE"]
+                Tb = Tb - n / unit
+            loss = torch.mean((model.net_out(Fb)[:, 0] - Tb) ** 2)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             opt.step()
