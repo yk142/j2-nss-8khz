@@ -18,7 +18,7 @@ import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from nss8k.data import load  # noqa: E402
-from nss8kacc.data import build_xy  # noqa: E402
+from nss8kacc.data import build_xy, targets, window_starts  # noqa: E402
 from nss8kacc.model import AccNSS  # noqa: E402
 
 
@@ -31,6 +31,11 @@ def parse(argv=None):
     p.add_argument("--depth", type=int, default=3)
     p.add_argument("--acc-noise", type=float, default=0.0,
                    help="学習時に入力 acc へ加えるガウスノイズの標準偏差 [rad/s²]。標的は y − acc_ノイズ入り（0 は基本形）")
+    p.add_argument("--rollout-k", type=int, default=0, help="ロールアウト損失の窓長 K（0 は使わない）")
+    p.add_argument("--rollout-mode", choices=("teacher", "full"), default="teacher",
+                   help="teacher: pos/vel は真値、acc だけ自己回帰。full: acc から積分した pos/vel も自己回帰（トルクは真値）")
+    p.add_argument("--rollout-batch", type=int, default=256, help="1 ステップあたりの窓の数")
+    p.add_argument("--rollout-weight", type=float, default=1.0, help="ロールアウト損失の重み（1 ステップ損失に加える）")
     p.add_argument("--feat", choices=("q", "sincos"), default="q", help="位置の入力: 生の q、または sin q・cos q")
     p.add_argument("--epochs", type=int, default=20)
     p.add_argument("--batch", type=int, default=4096)
@@ -52,6 +57,43 @@ def eval_loss(model, F, T, bs=65536):
     return tot / T.numel()
 
 
+@torch.no_grad()
+def eval_rollout(model, F, Y, starts, k, unit, mode):
+    model.eval()
+    return sum(float(rollout_loss(model, F, Y, starts[i:i + 4096], k, unit, mode)) * len(starts[i:i + 4096])
+               for i in range(0, len(starts), 4096)) / len(starts)
+
+
+def rollout_loss(model, F, Y, starts, k, unit, mode, noise=0.0):
+    """starts から k ステップ自己回帰した損失（標準化した acc 誤差の 2 乗の平均）。窓の先頭の acc は真値（noise > 0 なら加える）。
+    full では pos/vel の真値からのずれ（dq_dev, q_dev）を誤差から積分して入力へ戻し、状態の誤差も損失に足す
+    （一定の誤差 e に対する成長 j·dt·e、(j²/2)·dt²·e で割って、acc 誤差と同じ大きさにそろえる）。"""
+    sc, dt = model.scale, model.dt
+    ddq, dth = sc["DDQ_SCALE"], sc["DTHETA_MAX"]
+    acc = F[starts, 0] * ddq
+    if noise > 0:
+        acc = acc + torch.randn_like(acc) * noise
+    dq_dev = q_dev = torch.zeros_like(acc)
+    loss = 0.0
+    for j in range(k):
+        idx = starts + j
+        f = F[idx].clone()
+        f[:, 0] = acc / ddq
+        if mode == "full":
+            f[:, 2] = f[:, 2] + q_dev
+            f[:, 3] = f[:, 3] + dq_dev / dth
+        acc = acc + model.net_out(f)[:, 0] * unit
+        e = acc - Y[idx]
+        loss = loss + torch.mean((e / unit) ** 2)
+        if mode == "full":
+            dq_new = dq_dev + dt * e
+            q_dev = q_dev + 0.5 * dt * (dq_dev + dq_new)
+            dq_dev = dq_new
+            n = j + 1
+            loss = loss + torch.mean((dq_dev / (n * dt * unit)) ** 2) + torch.mean((q_dev / (0.5 * n * n * dt * dt * unit)) ** 2)
+    return loss / (k * (3 if mode == "full" else 1))
+
+
 def main(argv=None):
     a = parse(argv)
     torch.manual_seed(a.seed)
@@ -64,10 +106,18 @@ def main(argv=None):
     scale, phys, dt = d["scale"], d["physics"], d["dt"]
     Ftr, Dtr = build_xy(d["splits"]["train"], scale, a.feat)
     Fva, Dva = build_xy(d["splits"]["val"], scale, a.feat)
-    del d["splits"]
     if a.max_train and a.max_train < len(Ftr):
         idx = torch.from_numpy(np.sort(np.random.permutation(len(Ftr))[:a.max_train]))
         Ftr, Dtr = Ftr[idx], Dtr[idx]
+    roll = a.rollout_k > 0
+    if roll:
+        assert a.feat == "q", "ロールアウト損失は feat=q のみ"
+        Ytr, Yva = targets(d["splits"]["train"]), targets(d["splits"]["val"])
+        Str, Sva = window_starts(d["splits"]["train"], a.rollout_k), window_starts(d["splits"]["val"], a.rollout_k)
+        g = torch.Generator().manual_seed(1234)
+        Sva = Sva[torch.randperm(len(Sva), generator=g)[:20000]]
+        assert not a.max_train, "ロールアウト損失と --max-train は併用しない"
+    del d["splits"]
     model = AccNSS(scale, dt, phys, a.width, a.depth, a.feat)
     model.x_mean.copy_(Ftr.mean(0)); model.x_std.copy_(Ftr.std(0))
     model.d_std.copy_(Dtr.std().clamp_min(1e-6))
@@ -105,12 +155,18 @@ def main(argv=None):
                 Fb = Fb.clone(); Fb[:, 0] += n / scale["DDQ_SCALE"]
                 Tb = Tb - n / unit
             loss = torch.mean((model.net_out(Fb)[:, 0] - Tb) ** 2)
+            if roll:
+                st = Str[torch.randint(len(Str), (a.rollout_batch,))]
+                loss = loss + a.rollout_weight * rollout_loss(model, Ftr, Ytr, st, a.rollout_k, unit, a.rollout_mode, a.acc_noise)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             opt.step()
             run += float(loss.detach()) * len(idx); cnt += len(idx); step += 1
         vl = eval_loss(model, Fva, Tva)
-        rec = {"epoch": ep, "train_loss": run / cnt, "val_loss": vl, "val_rms_ddq": math.sqrt(vl) * unit,
+        vr = eval_rollout(model, Fva, Yva, Sva, a.rollout_k, unit, a.rollout_mode) if roll else 0.0
+        vl1 = vl
+        vl = vl + a.rollout_weight * vr                    # 最良エポックの選択は 1 ステップ + ロールアウトの検証損失
+        rec = {"epoch": ep, "train_loss": run / cnt, "val_loss": vl, "val_roll": vr, "val_rms_ddq": math.sqrt(vl1) * unit,
                "lr": lr_at(step - 1), "time_s": time.time() - t0}
         hist.append(rec)
         flag = ""

@@ -19,3 +19,19 @@ def build_xy(split, scale, feat="q"):
     pos = [np.sin(q), np.cos(q)] if feat == "sincos" else [q]
     F = np.stack([acc / scale["DDQ_SCALE"], tau / scale["TAU_MAX"], *pos, dq / scale["DTHETA_MAX"]], axis=1).astype(np.float32)
     return torch.from_numpy(F), torch.from_numpy((y - acc).astype(np.float32))
+
+
+def window_starts(split, k):
+    """k 個の連続する遷移（同じシナリオ・step が 1 ずつ増える）の先頭になれる行番号（pairs() の行基準、int64）。"""
+    ok = split["step"] > 0
+    i = np.flatnonzero(ok)
+    sid, st = split["scenario_id"][i], split["step"][i]
+    n = len(i)
+    s = np.arange(n - k + 1)
+    good = (sid[s + k - 1] == sid[s]) & (st[s + k - 1] - st[s] == k - 1)
+    return torch.from_numpy(s[good].astype(np.int64))
+
+
+def targets(split):
+    """pairs() の標的 y = acc_{k+1}（float32、rad/s²）。"""
+    return torch.from_numpy(pairs(split)[4].astype(np.float32))
