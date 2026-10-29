@@ -98,5 +98,8 @@ class ResidualNSS(_Base):
 
 
 def build_model(config):
+    if config["kind"] == "accflex":                       # 加速度状態 NSS（issue #51）
+        from nss8kaccflex.model import build_model as build_acc
+        return build_acc(config)
     cls = ResidualNSS if config["kind"] == "residual" else NSS
     return cls(config["scale"], config["dt"], config["phys_params"], config["flex"], config["width"], config["depth"])
