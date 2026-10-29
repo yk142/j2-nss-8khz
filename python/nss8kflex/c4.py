@@ -7,7 +7,7 @@ import h5py
 import numpy as np
 import torch
 
-from .evaluate_lib import flex_reference
+from .evaluate_lib import flex_reference, fresh
 
 WNS = (15, 30, 60, 90, 120, 180, 240)
 ZETAS = (0.7, 1.0, 1.5)
@@ -31,6 +31,7 @@ def load_refs(path):
 @torch.no_grad()
 def run_c4(step_fn, refs, p, flex, dt, gains=GAINS, period=8, progress=False):
     """全（ゲイン × 軌道）を同時に全長進める。戻り値: dict（Q, QM, U は (B, T)、len (B,)、diverged (B,)、index [(gain_i, ref_i)]）。"""
+    fresh(step_fn)
     index = [(gi, ri) for gi in range(len(gains)) for ri in range(len(refs))]
     B = len(index)
     K = np.array([len(refs[ri]["qref"]) for _, ri in index])

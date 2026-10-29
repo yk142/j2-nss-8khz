@@ -14,6 +14,14 @@ GATES = {"a_test_ratio": 1.0, "b_deg_4000": 0.4, "b_twist_ratio": 1.0, "c_deg": 
 PD_WN, PD_ZETA = 30.0, 1.0
 
 
+def fresh(step_fn):
+    """状態（直前の加速度）を持つモデルの step_fn なら reset() を呼ぶ。ロールアウトの先頭で呼び、前の実行の持ち越しを防ぐ。"""
+    m = getattr(step_fn, "__self__", None)
+    if hasattr(m, "reset"):
+        m.reset()
+    return step_fn
+
+
 def _rms(a):
     return float(np.sqrt(np.mean(np.square(a)))) if np.size(a) else float("nan")
 
@@ -61,6 +69,7 @@ def step_fns(model, phys):
 @torch.no_grad()
 def rollout(step_fn, s0, tau):
     """s0 = (q, dq, qm, dqm) それぞれ (B,)、tau: (B, H)。H ステップ自己回帰で進め、(B, H+1) の 4 配列を返す。"""
+    fresh(step_fn)
     B, H = tau.shape
     S = [torch.empty(B, H + 1, dtype=s0[0].dtype) for _ in range(4)]
     cur = tuple(s0)
@@ -128,6 +137,7 @@ def flex_reference(seq, p, flex, dt):
 def closed_loop_batch(step_fn, seqs, p, flex, dt):
     """モータ角 PD＋FF を閉ループに入れ、プラントを step_fn に置き換えて、全軌跡を同時に全長進める。
     戻り値: Q, QM (B, T+1)（NaN 埋め）、U (B, T)。"""
+    fresh(step_fn)
     B = len(seqs)
     K = np.array([len(s["tau"]) for s in seqs])
     T = int(K.max())

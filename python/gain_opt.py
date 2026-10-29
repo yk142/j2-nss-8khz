@@ -25,7 +25,7 @@ def key(wn, z):
     return (round(float(wn), 3), round(float(z), 3))
 
 
-OUT = "reports/issue-41"                     # 出力先。#39 の走査結果は OUT_OLD から読み、新しい格子点だけを OUT に足す
+OUT = os.environ.get("GAIN_OUT", "reports/issue-41")                     # 出力先。#39 の走査結果は OUT_OLD から読み、新しい格子点だけを OUT に足す
 OUT_OLD = "reports/issue-39"
 WN0, WN_RATIO, N_WN = 15.0, 1.1, 41          # wn = 15〜680 rad/s（#39 は 32 点で 288 まで）
 ZETAS = [round(0.1 + 0.1 * i, 1) for i in range(20)]     # ζ = 0.1〜2.0（#39 は 0.5〜2.0）
@@ -84,11 +84,14 @@ def cmd_scan(a):
     d = load(a.data, splits=("benchmark",))
     p, fl, dt = d["physics"], d["flex"], d["dt"]
     refs = c4.load_refs(a.refs)
-    gains = [g for g in GRID if key(*g) not in OLD_GRID] + [NORM]       # #39 で走査済みの格子点は再利用
     for run in a.runs:
         path = os.path.join(OUT, f"scan_{run}.json")
         if os.path.exists(path):
             continue
+        if os.path.exists(os.path.join(OUT_OLD, f"scan_{run}.json")):
+            gains = [g for g in GRID if key(*g) not in OLD_GRID] + [NORM]       # #39 で走査済みの格子点は再利用
+        else:
+            gains = list(GRID) + [NORM]                                        # 新しいモデルは全格子を走査（#51）
         t0 = time.time()
         rows = scan_rows(make_step(run, p, fl, dt, a.out_root), refs, p, fl, dt, gains)
         json.dump({"run": run, "rows": rows}, open(path, "w"))
@@ -100,7 +103,8 @@ def cmd_scan(a):
 
 def load_scan(run):
     """#39 の走査（OUT_OLD）と、新しい格子点（OUT）をつないで返す。J は同じ (30, 1) で正規化済み。余裕は広い格子で付け直す。"""
-    old = json.load(open(os.path.join(OUT_OLD, f"scan_{run}.json")))["rows"]
+    po = os.path.join(OUT_OLD, f"scan_{run}.json")
+    old = json.load(open(po))["rows"] if os.path.exists(po) else []
     new = json.load(open(os.path.join(OUT, f"scan_{run}.json")))["rows"]
     rows = [r for r in old if key(r["wn"], r["zeta"]) != key(*NORM)] + [r for r in new if key(r["wn"], r["zeta"]) != key(*NORM)]
     return mark_margin(rows)
@@ -141,7 +145,7 @@ def cmd_select(a):
 def truth_all():
     """既存の 21 ゲイン（#25）＋検証用ゲイン（issue #39）の真値。J は (30, 1) の真値で正規化。"""
     rows = json.load(open("reports/issue-25/eval_C4.json"))
-    for d in (OUT_OLD, OUT):
+    for d in dict.fromkeys((OUT_OLD, "reports/issue-41", OUT)):
         path = os.path.join(d, "truth_verify.json")
         if os.path.exists(path):
             rows += json.load(open(path))

@@ -1,0 +1,32 @@
+{
+ "accflex_n2.5_w64_s0": {
+  "n_gains": 21,
+  "n_class_match": 21,
+  "class_pass": true,
+  "mismatch": [],
+  "n_stable_truth": 16,
+  "spearman_J": 0.9911764705882352,
+  "spearman_track": 0.9970588235294118,
+  "spearman_pass": true
+ },
+ "accflex_n5_w64_s0": {
+  "n_gains": 21,
+  "n_class_match": 21,
+  "class_pass": true,
+  "mismatch": [],
+  "n_stable_truth": 16,
+  "spearman_J": 0.9911764705882352,
+  "spearman_track": 1.0,
+  "spearman_pass": true
+ },
+ "accflex_n10_w64_s0": {
+  "n_gains": 21,
+  "n_class_match": 21,
+  "class_pass": true,
+  "mismatch": [],
+  "n_stable_truth": 16,
+  "spearman_J": 0.9941176470588234,
+  "spearman_track": 1.0,
+  "spearman_pass": true
+ }
+}
